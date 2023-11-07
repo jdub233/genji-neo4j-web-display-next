@@ -23,10 +23,14 @@ jobs:
           echo "NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}" >> .env
           echo "NEO4J_USERNAME=${{ secrets.NEO4J_USERNAME }}" >> .env
           echo "NEO4J_URI=${{ secrets.NEO4J_URI }}" >> .env
+      - name: Generate token
+        run: |
+          oc login --token=${{ secrets.TOKEN_CREATOR_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+          echo "OC_TOKEN=$(oc create token github-actions)" >> $GITHUB_ENV
       - name: Nodeshift deploy
         run: |
           npx nodeshift NPM_RUN="npm start" --deploy.port 3000 --expose \
-            --token=${{ secrets.OC_TOKEN }} \
+            --token=${{ env.OC_TOKEN }} \
             --server=${{ secrets.OC_SERVER }} \
             --namespace.name ${{ secrets.OC_NAMESPACE }}
-
